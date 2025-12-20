@@ -1,0 +1,8 @@
+/tesy
+/.idea/
+/node_modules/
+/firebase/
+/.env
+/.env.example
+/otrh
+/server/node_modules/
