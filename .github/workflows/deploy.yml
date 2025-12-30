@@ -19,16 +19,18 @@ jobs:
           node-version: '18'
           cache: 'npm'
 
-      - name: Install dependencies
+      # ---------- FRONTEND ----------
+      - name: Install frontend dependencies
         run: npm install --legacy-peer-deps
 
       - name: Build React app
         run: npm run build
         env:
+          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
           REACT_APP_SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL }}
           REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}
 
-      - name: Deploy to LWS via FTP
+      - name: Deploy frontend to LWS
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_HOST }}
@@ -36,5 +38,20 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./build/
-          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          server-dir: /public_html/interview/
+          dangerous-clean-slate: false
+
+      # ---------- BACKEND ----------
+      - name: Deploy Express server (no node_modules)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          port: ${{ secrets.FTP_PORT }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./server/
+          server-dir: /public_html/interview/server/
+          exclude: |
+            **/node_modules/**
+            **/.env
           dangerous-clean-slate: false
